@@ -13,13 +13,81 @@ typedef struct {
     int tiempoDeEjecucion;
 } Subproceso;
 
+typedef struct Nodo{
+    Subproceso * s;
+    struct Nodo * next;
+} Nodo_t;
+
+int conteo = 0;
+Nodo_t * head = NULL;
+
+void enqueueRR(int id, int padre, int tiempoDeEjecucion){
+    Nodo_t * actual = head;
+
+    if (conteo == 0){
+        Subproceso * sp = (Subproceso *) malloc(sizeof(Subproceso));
+
+        sp->id = id;
+        sp->padre = padre;
+        sp->tiempoDeEjecucion = tiempoDeEjecucion;
+
+        head->s = sp;
+    }
+
+    else {
+        while (actual->next != NULL){
+            actual = actual->next;
+        }
+
+        actual->next = malloc(sizeof(Nodo_t));
+        Subproceso * sp = (Subproceso *) malloc(sizeof(Subproceso));
+
+        sp->id = id;
+        sp->padre = padre;
+        sp->tiempoDeEjecucion = tiempoDeEjecucion;
+
+        actual->next->s = sp;
+        actual->next->next = NULL;
+    }
+
+    ++conteo;
+}
+
+Subproceso * dequeueRR(){
+    Subproceso * valorDeRegreso;
+
+    if (conteo == 1){
+        valorDeRegreso = head->s;
+    }
+
+    else {
+        Nodo_t * siguienteProceso = head->next;
+        valorDeRegreso = head->s;
+        free(head->s);
+        free(head);
+        head = siguienteProceso;
+    }
+
+    --conteo;
+
+    return valorDeRegreso;
+}
+
 int main(){
+    head = malloc(sizeof(Nodo_t));
+    head->next = NULL;
     int cantidadDeProcesos = 0;
     int cantidadDeSubprocesos = 0;
     int totalDeSubprocesos = 0;
     int contadorDeSubprocesos = -1;
     int contadorDeProcesos = 0;
+    int quantum = 10;
+    int cpus = 0;
+    int tiempoFake = 0;
     
+    printf("Proporcione la cantidad de CPUs: ");
+    scanf("%d", &cpus);
+
     printf("\nProporcione la cantidad de procesos (no subprocesos): ");
     scanf("%d", &cantidadDeProcesos);
     printf("\n");
@@ -41,53 +109,36 @@ int main(){
         ++j;
     }
 
-    Subproceso * subprocesos = (Subproceso *) malloc(sizeof(Subproceso) * totalDeSubprocesos);
-    Subproceso * finSubprocesos = subprocesos + totalDeSubprocesos;
-
-    Subproceso * s = subprocesos;
+    int a = 0;
     i = arr;
     j = 0;
     int k = 0;
 
-    while (s < finSubprocesos){
+    while (a < totalDeSubprocesos){
         if (k == *i){
             contadorDeSubprocesos = 0;
-            s->id = contadorDeSubprocesos;
-
             ++j;
-            s->padre = j;
-
             ++k;
             ++i;
-
-            printf("\nProporcione el tiempo de ejecución del subproceso %d-%d: ", s->padre, s->id);
-            scanf("%d", &s->tiempoDeEjecucion);
-
-            ++s;
         }
 
         else {
             ++contadorDeSubprocesos;
-            s->id = contadorDeSubprocesos;
-
-            s->padre = j;
             ++k;
-
-            printf("\nProporcione el tiempo de ejecución del subproceso %d-%d: ", s->padre, s->id);
-            scanf("%d", &s->tiempoDeEjecucion);
-
-            ++s;
         }
+
+        printf("\nProporcione el tiempo de ejecución del subproceso %d-%d: ", j, contadorDeSubprocesos);
+        scanf("%d", &tiempoFake);
+
+        printf("Añadiendo proceso a la cola de Round Robin.");
+        enqueueRR(contadorDeSubprocesos, j, tiempoFake);
+
+        printf("\n");
+
+        ++a;
     }
-
-    for (s = subprocesos; s < finSubprocesos; ++s){
-        printf("\nSubproceso %d-%d \nTiempo de Ejecución: %d", s->padre, s->id, s->tiempoDeEjecucion);
-    }
-
-    printf("\n");
-
-    free(subprocesos);
+    
     free(arr);
-
+    
     return 0;
 }
