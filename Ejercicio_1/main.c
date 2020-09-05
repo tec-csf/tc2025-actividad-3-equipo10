@@ -155,15 +155,12 @@ int main(){
                 sp->tiempoDeEjecucion -= quantum;
 
                 if (sp->tiempoDeEjecucion <= 0){
+                    printf("El subproceso %d-%d en CPU %d ha acabado.\n", sp->padre, sp->id, b);
                     free(sp);
                 }
 
                 else if (sp->tiempoDeEjecucion > 0){
                     enqueueRR(sp->id, sp->padre, sp->tiempoDeEjecucion);
-                }
-
-                else {
-                    printf("El subproceso %d-%d en CPU %d ha acabado.\n", sp->padre, sp->id, b);
                 }
             }
         }
