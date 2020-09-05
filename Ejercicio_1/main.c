@@ -2,10 +2,14 @@
 Autór: Sergio Hernandez Castillo
 Matrícula: A01025210
 Descripción: Actividad 3 - Administración de un SO - Ejercicio 1
+
+NOTA: Mi compañero Antonio Junco se encargó del ejericio 2, y trabaje junto con Daniel Roa
+      ya que a el le tocó hacer este ejercicio también.
 */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 typedef struct {
     int id;
@@ -56,14 +60,17 @@ void enqueueRR(int id, int padre, int tiempoDeEjecucion){
 Subproceso * dequeueRR(){
     Subproceso * valorDeRegreso;
 
-    if (conteo == 1){
+    if (conteo == 0){
+        valorDeRegreso = NULL; 
+    }
+
+    else if (conteo == 1){
         valorDeRegreso = head->s;
     }
 
     else {
         Nodo_t * siguienteProceso = head->next;
         valorDeRegreso = head->s;
-        free(head->s);
         free(head);
         head = siguienteProceso;
     }
@@ -81,11 +88,12 @@ int main(){
     int totalDeSubprocesos = 0;
     int contadorDeSubprocesos = -1;
     int contadorDeProcesos = 0;
-    int quantum = 10;
+    int quantum = 5;
     int cpus = 0;
     int tiempoFake = 0;
     
-    printf("Proporcione la cantidad de CPUs: ");
+    printf("El quantum dura %d segundos.", quantum);
+    printf("\nProporcione la cantidad de CPUs: ");
     scanf("%d", &cpus);
 
     printf("\nProporcione la cantidad de procesos (no subprocesos): ");
@@ -137,8 +145,35 @@ int main(){
 
         ++a;
     }
-    
+
+    while (conteo > 0){
+        for (int b = 0; b < cpus; ++b){
+            if (conteo > 0){
+                Subproceso * sp = dequeueRR();
+                printf("\nSacando al subproceso %d-%d de la cola y insertándolo al CPU %d \nTiempo de ejecución: %d\n", sp->padre, sp->id, b, sp->tiempoDeEjecucion);
+
+                sp->tiempoDeEjecucion -= quantum;
+
+                if (sp->tiempoDeEjecucion <= 0){
+                    free(sp);
+                }
+
+                else if (sp->tiempoDeEjecucion > 0){
+                    enqueueRR(sp->id, sp->padre, sp->tiempoDeEjecucion);
+                }
+
+                else {
+                    printf("El subproceso %d-%d en CPU %d ha acabado.\n", sp->padre, sp->id, b);
+                }
+            }
+        }
+
+        sleep(quantum);
+        printf("\nEl quantum ha finalizado.\n");
+    }
+
     free(arr);
+    free(head);
     
     return 0;
 }
