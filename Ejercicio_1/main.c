@@ -5,6 +5,8 @@ Descripción: Actividad 3 - Administración de un SO - Ejercicio 1
 
 NOTA: Mi compañero Antonio Junco se encargó del ejericio 2, y trabaje junto con Daniel Roa
       ya que a el le tocó hacer este ejercicio también.
+
+WARNING: Hay una fuga de memoria al no liberar el apuntador "next". Solo se libera "head" y "s".
 */
 
 #include <stdio.h>
